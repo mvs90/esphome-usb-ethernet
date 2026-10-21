@@ -451,3 +451,7 @@ Hardware-Tallytxerr beim ersten Lesen1, während180s konstant; Ursache nicht
 isoliert. Andere Hardwarefehlerbaselines0 und alle Fehlerdifferenzen0.
 Spezialfälle EEE-LPI/Pause-Framewirkung/erzwungener Halbduplex sowie isoliertes
 Broadcast-/Multicast-Wake bleiben offen. Kein stabiles1.0-Release.
+
+## Adapter replacement candidate (not released)
+
+Both measured adapters already share one native YAML. Local reconnect changes add strict factory-MAC parsing, per-device data/control binding and pending-transfer fences. No boards were connected for this change. Cold replacement in both directions, fixed-MAC replacement and separately powered live USB replacement remain unqualified. See [the test plan](docs/ADAPTER_SWITCHING.de.md).

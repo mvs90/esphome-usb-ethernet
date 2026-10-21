@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 #include "esphome/core/defines.h"
 #include "realtek_control.h"
+#include "realtek_adapter.h"
 #include "realtek_multicast.h"
 #include "realtek_pause.h"
 #include "usb/usb_host.h"
@@ -60,7 +61,7 @@ esp_err_t RealtekControl::open(usbh_cdc_port_handle_t port) {
   TRY_OP(usbh_cdc_get_dev_handle(port, &device));
 #endif
   TRY_OP(usb_host_get_device_descriptor(device, &d));
-  if (!d || d->idVendor != 0x0bda || d->idProduct != 0x8152 || d->bcdDevice != 0x2000)
+  if (!d || !rtl_adapter::supported(d->idVendor, d->idProduct, d->bcdDevice))
     return ESP_ERR_NOT_SUPPORTED;
   port_ = port;
   uint16_t revision;

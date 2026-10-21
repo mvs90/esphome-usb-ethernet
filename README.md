@@ -78,3 +78,7 @@ Half-duplex traffic, a purely asymmetric pause partner, and independent physical
 C/C++ runtime additions are GPL-3.0-only; Python additions are MIT. Preserve ESPHome-derived notices. See [LICENSE](LICENSE), [NOTICE.md](NOTICE.md), and [CONTRIBUTING.md](CONTRIBUTING.md).
 
 Reference: [ESPHome external-components documentation](https://esphome.io/components/external_components/).
+
+## Automatic adapter selection
+
+Both measured adapters use the same `USB_RTL8152` YAML: no retail-model selector is required. See [adapter switching and stable MAC configuration (German)](docs/ADAPTER_SWITCHING.de.md). The local reconnect-hardening candidate still requires hardware qualification.

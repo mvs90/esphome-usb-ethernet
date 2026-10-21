@@ -3,6 +3,7 @@
 #include "esphome/core/defines.h"
 #ifdef USE_ETHERNET_REALTEK_BULK
 #include "realtek_bulk.h"
+#include "realtek_adapter.h"
 #include "realtek_control.h"
 #include "realtek_pm_observation.h"
 #include "realtek_frames.h"
@@ -40,6 +41,7 @@ struct Bulk {
   std::atomic<uint8_t> address{0};
   std::atomic<bool> data_resumed{false};
   std::atomic<cdc_acm_dev_hdl_t> disconnected{nullptr};
+  std::atomic<bool> disconnecting{false};
   uint8_t mac[6]{};
   std::atomic<bool> initialized{false}, linked{false};
   usb_host_client_handle_t monitor{nullptr};
@@ -65,6 +67,9 @@ struct Bulk {
 #endif
   SemaphoreHandle_t control_done{nullptr};
   std::atomic<usb_device_handle_t> monitored{nullptr};
+  // Bind the CDC interface to the exact device that was opened, never to a
+  // replacement enumerated while old disconnect callbacks are still pending.
+  std::atomic<usb_device_handle_t> port_device{nullptr};
   std::atomic<bool> paused{false}, resumed_event{false}, resume_ready{false};
   uint32_t suspend_requested{0}, suspend_entered{0}, last_suspended_ms{0}, maximum_ms{0};
   bool forced{false}, seen_suspended{false}, hub_remote{false}, nic_remote{false};
@@ -129,7 +134,7 @@ static bool finish_native_tx(Bulk *b) {
 }
 static esp_err_t submit_native_tx(Bulk *b,const uint8_t *data,size_t bytes,unsigned frames,uint32_t generation,bool segmented) {
   auto device=b->monitored.load();
-  if(!device || !b->tx_endpoint || !b->tx_transfer)return ESP_ERR_INVALID_STATE;
+  if(!device || device!=b->port_device.load() || !b->tx_endpoint || !b->tx_transfer)return ESP_ERR_INVALID_STATE;
   if(!bytes || bytes>size_t(b->tx_transfer->data_buffer_size))return ESP_ERR_INVALID_SIZE;
   if(b->tx_lease.begin()==RealtekTransferLease::Start::BUSY)return ESP_ERR_NOT_FINISHED;
   while(xSemaphoreTake(b->tx_done,0)==pdTRUE){}
@@ -188,7 +193,8 @@ std::string realtek_native_boot_tally(unsigned slot) {
 #endif
 esp_err_t realtek_native_device(usbh_cdc_port_handle_t port,usb_device_handle_t *device) {
   if(!active_bulk || !port || port!=active_bulk->port.load() || !device)return ESP_ERR_INVALID_STATE;
-  *device=active_bulk->monitored.load();return *device?ESP_OK:ESP_ERR_INVALID_STATE;
+  *device=active_bulk->monitored.load();
+  return *device && *device==active_bulk->port_device.load()?ESP_OK:ESP_ERR_INVALID_STATE;
 }
 // A dedicated client/transfer stays open across suspend/resume.
 // Management is main-loop-only, so there is exactly one control request at a time.
@@ -227,7 +233,9 @@ static esp_err_t native_device_request(Bulk *b,usb_device_handle_t device,uint8_
 esp_err_t realtek_native_request(usbh_cdc_port_handle_t port,uint8_t direction,uint8_t request,uint16_t value,uint16_t index,uint16_t length,uint8_t *data) {
   auto *b=active_bulk;
   if(!b || !port || port!=b->port.load())return ESP_ERR_INVALID_STATE;
-  return native_device_request(b,b->monitored.load(),direction,request,value,index,length,data);
+  auto device=b->monitored.load();
+  if(!device || device!=b->port_device.load())return ESP_ERR_INVALID_STATE;
+  return native_device_request(b,device,direction,request,value,index,length,data);
 }
 static esp_err_t set_hub_remote(Bulk *b,bool enabled) {
   // USB1.6.0 hides hub NEW_DEV events and leaves public parent.dev_hdl NULL
@@ -306,12 +314,16 @@ static bool rx(const uint8_t *data,size_t size,void *arg) {
 static void device_event(const cdc_acm_host_dev_event_data_t *event,void *arg) {
   auto *b=static_cast<Bulk *>(arg);
   if(event->type==CDC_ACM_HOST_DEVICE_DISCONNECTED) {
+    b->disconnecting.store(true);
     b->suspend_pending=false;
-    b->port.store(nullptr);b->initialized=false;b->linked=false;
+    b->port.store(nullptr);b->port_device.store(nullptr);b->initialized=false;b->linked=false;
+    b->reset_decoder.store(true);b->reinitialized.store(true);
+    b->resumed_event.store(false);b->data_resumed.store(false);
     b->tx_generation.fetch_add(1);
     if(b->paused.exchange(false))b->resume_ready.store(true);
-    b->disconnected.store(event->data.cdc_hdl);
     iot_eth_link_t down=IOT_ETH_LINK_DOWN;b->mediator->on_stage_changed(b->mediator,IOT_ETH_STAGE_LINK,&down);
+    // Publish retirement only after all callback state updates are complete.
+    b->disconnected.store(event->data.cdc_hdl);
   } else if(event->type==CDC_ACM_HOST_DEVICE_RESUMED) {
     b->data_resumed.store(true);ESP_LOGI("ethernet.rtl.pm","Data polling RESUMED");
   } else if(event->type==CDC_ACM_HOST_DEVICE_SUSPENDED) {
@@ -326,15 +338,24 @@ static void monitor_event(const usb_host_client_event_msg_t *event,void *arg) {
     usb_device_handle_t device=nullptr;
     if(usb_host_device_open(b->monitor,event->new_dev.address,&device)!=ESP_OK)return;
     const usb_device_desc_t *d=nullptr;usb_host_get_device_descriptor(device,&d);
-    if(d && d->idVendor==0x0bda && d->idProduct==0x8152 && d->bcdDevice==0x2000) {
+    if(d && rtl_adapter::supported(d->idVendor,d->idProduct,d->bcdDevice)) {
       const usb_config_desc_t *config=nullptr;usb_host_get_active_config_descriptor(device,&config);
-      if(config && config->bConfigurationValue==1){b->address=event->new_dev.address;b->monitored.store(device);}
+      if(config && config->bConfigurationValue==1 && !b->monitored.load()) {
+        b->address=event->new_dev.address;b->monitored.store(device);
+        ESP_LOGI("ethernet.rtl","Detected supported RTL8152 USB %04x:%04x bcd=%04x address=%u",
+                 d->idVendor,d->idProduct,d->bcdDevice,unsigned(event->new_dev.address));
+      }
       else usb_host_device_close(b->monitor,device);
     }
     else usb_host_device_close(b->monitor,device);
   } else if(event->event==USB_HOST_CLIENT_EVENT_DEV_GONE) {
     auto device=event->dev_gone.dev_hdl;
-    if(device==b->monitored.load())b->monitored.store(nullptr);
+    if(device==b->monitored.load()) {
+      b->monitored.store(nullptr);b->address.store(0);
+      b->initialized.store(false);b->linked.store(false);
+      b->tx_generation.fetch_add(1);b->reset_decoder.store(true);
+      b->reinitialized.store(true);
+    }
     if(xQueueSend(b->retired_devices,&device,0)!=pdTRUE)
       ESP_LOGE("ethernet.rtl","Retired device queue full; host restart required");
   } else if(event->event==USB_HOST_CLIENT_EVENT_DEV_SUSPENDED && event->dev_suspend_resume.dev_hdl==b->monitored.load()) {
@@ -350,6 +371,9 @@ static void monitor_task(void *arg) {
   }
 }
 static esp_err_t open_data_port(Bulk *b) {
+  const auto device=b->monitored.load();
+  if(!device || b->disconnecting.load() || b->disconnected.load() || b->control_lease.in_flight() ||
+     b->tx_lease.in_flight() || uxQueueMessagesWaiting(b->retired_devices))return ESP_ERR_INVALID_STATE;
   cdc_acm_host_open_config_t config{};config.vid=0x0bda;config.pid=0x8152;
   config.interface_idx=0;config.dev_addr=b->address;config.connection_timeout_ms=100;
   config.in_buffer_size=b->rx_aggregation?4096:2048;config.out_buffer_size=8192;config.data_cb=rx;config.event_cb=device_event;config.user_arg=b;
@@ -359,8 +383,7 @@ static esp_err_t open_data_port(Bulk *b) {
     // by this driver using the public Host API and the shared opened device.
     // USB 1.6.0 dispatches completion through the endpoint owner's event task.
     const usb_config_desc_t *desc=nullptr;
-    auto device=b->monitored.load();
-    e=device?usb_host_get_active_config_descriptor(device,&desc):ESP_ERR_INVALID_STATE;
+    e=device==b->monitored.load()?usb_host_get_active_config_descriptor(device,&desc):ESP_ERR_INVALID_STATE;
     unsigned outputs=0;uint8_t endpoint=0;
     if(e==ESP_OK && desc) {
       const uint8_t *raw=reinterpret_cast<const uint8_t *>(desc);
@@ -377,7 +400,8 @@ static esp_err_t open_data_port(Bulk *b) {
       }
     }
     if(e==ESP_OK && outputs!=1)e=ESP_ERR_NOT_SUPPORTED;
-    if(e==ESP_OK){b->tx_endpoint=endpoint;b->port.store(reinterpret_cast<usbh_cdc_port_handle_t>(port));}
+    if(e==ESP_OK && device!=b->monitored.load())e=ESP_ERR_INVALID_STATE;
+    if(e==ESP_OK){b->tx_endpoint=endpoint;b->port_device.store(device);b->port.store(reinterpret_cast<usbh_cdc_port_handle_t>(port));}
     else cdc_acm_host_close(port);
   }
   ESP_LOGI("ethernet.rtl","Open native vendor bulk: %s",esp_err_to_name(e));return e;
@@ -625,11 +649,15 @@ void realtek_bulk_poll(iot_eth_driver_t *driver) {
   }
   auto gone=b->disconnected.exchange(nullptr);
   if(gone) {
-    if(b->tx_lease.in_flight()){b->disconnected.store(gone);return;}
+    if(b->tx_lease.in_flight() || b->control_lease.in_flight()){b->disconnected.store(gone);return;}
     if(xSemaphoreTake(b->port_mutex,pdMS_TO_TICKS(200))==pdTRUE){
       // Submission may have started after the optimistic check above.
-      if(b->tx_lease.in_flight())b->disconnected.store(gone);
-      else cdc_acm_host_close(gone);
+      if(b->tx_lease.in_flight() || b->control_lease.in_flight())b->disconnected.store(gone);
+      else {
+        esp_err_t closed=cdc_acm_host_close(gone);
+        if(closed==ESP_OK)b->disconnecting.store(false);
+        else b->disconnected.store(gone);
+      }
       xSemaphoreGive(b->port_mutex);
     }
     else b->disconnected.store(gone);
@@ -643,11 +671,11 @@ void realtek_bulk_poll(iot_eth_driver_t *driver) {
     uint8_t descriptor[64]{};
     // iMAC=3 was measured in the alternate ECM function descriptor of this exact tuple.
     esp_err_t error=realtek_native_request(port,0x80,6,0x0303,0x0409,64,descriptor);
-    if(error!=ESP_OK||descriptor[0]<26)return;
-    for(unsigned i=0;i<6;i++) {
-      char digits[3]={char(descriptor[2+i*4]),char(descriptor[4+i*4]),0};char *end=nullptr;
-      unsigned long v=strtoul(digits,&end,16);if(end!=digits+2)return;b->mac[i]=v;
-    }
+    uint8_t factory_mac[6]{};
+    if(error!=ESP_OK || !rtl_adapter::factory_mac(descriptor,sizeof(descriptor),factory_mac))return;
+    memcpy(b->mac,factory_mac,6);
+    ESP_LOGI("ethernet.rtl","Adapter factory MAC %02X:%02X:%02X:%02X:%02X:%02X (retail brand not encoded)",
+             b->mac[0],b->mac[1],b->mac[2],b->mac[3],b->mac[4],b->mac[5]);
 #ifdef USE_RTL_BOOT_TALLY_PROBE
     for(auto &sample:b->boot_tally)sample.clear();
     realtek_native_boot_tally_record(0,"before_native");

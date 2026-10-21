@@ -7,6 +7,7 @@
 
 #include "iot_usbh_ecm.h"
 #include "realtek_bulk.h"
+#include "realtek_adapter.h"
 #include "realtek_retry_deadline.h"
 #include "iot_usbh_cdc.h"
 #include "usb/usb_host.h"
@@ -34,8 +35,8 @@ bool EthernetComponent::check_error_(esp_err_t error, const char *operation) {
 }
 
 static bool select_configuration(const usb_device_desc_t *d, uint8_t *configuration) {
-  if (d->idVendor == 0x0bda && d->idProduct == 0x8152 &&
-      d->bcdDevice == 0x2000 && d->bNumConfigurations == 2)
+  if (rtl_adapter::supported(d->idVendor, d->idProduct, d->bcdDevice) &&
+      d->bNumConfigurations == 2)
 #ifdef USE_ETHERNET_REALTEK_BULK
     *configuration = 1;
 #else

@@ -40,3 +40,7 @@ Die gemessenen InLine-/P2C5V-Exemplare sind am genannten Board geprüft, einschl
 **Für P2C5V ist keine vollständige verlustfreie Datenstunde bestätigt.** Belegte Mac-Linkabbrüche wurden vom Betreiber ausdrücklich als externe Ausnahme akzeptiert; die ursprünglichen FAIL-Ergebnisse bleiben erhalten. Andere Chips/Platinen, Halbduplexverkehr, rein asymmetrische Pause und eine unabhängige physische LPI-Messung benötigen eigene Prüfungen. Es ist keine Temperatur-/Strommessschnittstelle dieser RTL-Revision belegt. Der USB-Full-Speed-Bus begrenzt den Durchsatz; 100-Mbit-Link ist nicht 100-Mbit-Nutzdatenrate.
 
 Details: [TEST_STATUS.md](TEST_STATUS.md). Lizenz: C/C++-Runtime GPL-3.0-only, Python MIT, vorhandene ESPHome-Hinweise bleiben erhalten; siehe [LICENSE](LICENSE).
+
+## Automatischer Adapterwechsel
+
+InLine und P2C5V verwenden dieselbe `USB_RTL8152`-YAML. Siehe [Erkennung, Umstecken und feste MAC](docs/ADAPTER_SWITCHING.de.md). Der lokale Wechsel-Kandidat ist noch hardwareseitig zu prüfen.
