@@ -1,0 +1,21 @@
+name: Validate
+on: [push, pull_request, workflow_dispatch]
+permissions:
+  contents: read
+jobs:
+  host-tests:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - run: python3 tools/run_cpp_tests.py
+  esphome-build:
+    runs-on: ubuntu-24.04
+    container: ghcr.io/esphome/esphome:2026.9.1
+    strategy:
+      fail-fast: false
+      matrix:
+        example: [inline, p2c5v, ecm]
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - run: python3 tools/prepare_ci.py examples/${{ matrix.example }}.yaml .ci/${{ matrix.example }}.yaml
+      - run: esphome compile .ci/${{ matrix.example }}.yaml

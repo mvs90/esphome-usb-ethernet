@@ -1,0 +1,45 @@
+{
+  "release": "0.1.0-rc.5",
+  "esphome": "2026.9.1",
+  "esphome_commit": "0b2b16e664ecfc0add37f3435db1c2140b8a687e",
+  "esp_idf": "5.5.5",
+  "dependencies": {
+    "usb": "1.6.0",
+    "usb_host_cdc_acm": "2.4.1",
+    "iot_usbh_ecm": "0.4.0",
+    "iot_usbh_cdc": "3.1.0",
+    "iot_eth": "1.1.0",
+    "cmake_utilities": "1.1.1"
+  },
+  "source_layout": "components/ethernet, components/ethernet_info, components/logger; LLDP in mvs90/esphome-lldp",
+  "runtime_changes_from_tested_v101": "none",
+  "tested_board": "Waveshare ESP32-S3-LCD-Driver-Board, 8 MB flash, no display/battery",
+  "adapters": [
+    "InLine 33380J POE01",
+    "P2C5V unit referenced by ASIN B09M2N3NHX"
+  ],
+  "measured_usb": "0bda:8152/bcdDevice2000, masked revision4C10",
+  "p2c5v_strict_loss_free_hour_passed": false,
+  "p2c5v_operator_accepts_external_host_link_exception": true,
+  "p2c5v_clean_ota_boot_api_ha_and_three_poe_cold_starts_passed": true,
+  "runtime_sanitizer_suites": 17,
+  "lldp_repository": "https://github.com/mvs90/esphome-lldp",
+  "remaining_limits": [
+    "half-duplex peer unavailable",
+    "pure asymmetric pause partner unavailable",
+    "physical LPI duration/energy not independently qualified",
+    "other RTL revisions/boards/hub topologies not qualified"
+  ],
+  "publication_validation": {
+    "date": "2026-10-21",
+    "ethernet_runtime_suites": 17,
+    "lldp_runtime_suites": 3,
+    "complete_builds": [
+      "inline",
+      "p2c5v",
+      "ecm",
+      "ethernet-plus-separated-lldp"
+    ],
+    "firmware_credentials": "synthetic build-only; never flashed"
+  }
+}

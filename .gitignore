@@ -1,0 +1,10 @@
+**/secrets.yaml
+**/secrets.yml
+.esphome/
+**/.esphome/
+.ci/
+__pycache__/
+*.bin
+!tests/fixtures/*.bin
+*.elf
+.DS_Store

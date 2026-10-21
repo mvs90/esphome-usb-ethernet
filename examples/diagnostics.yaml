@@ -1,0 +1,14 @@
+# Optional ESPHome package; requires ethernet id: usb_ethernet and USB_RTL8152.
+text_sensor:
+  - platform: template
+    name: Realtek Status
+    lambda: return {id(usb_ethernet).read_realtek_diagnostics()};
+    update_interval: 30s
+  - platform: template
+    name: Realtek Counters
+    lambda: return {id(usb_ethernet).read_realtek_counters()};
+    update_interval: 30s
+  - platform: template
+    name: Native Errors
+    lambda: return {id(usb_ethernet).native_errors()};
+    update_interval: 10s
