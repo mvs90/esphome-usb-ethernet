@@ -1,5 +1,7 @@
 # USB Ethernet + PoE for ESPHome on ESP32-S3
 
+**Browser-only setup:** [Paste YAML into the Device Builder and first-flash with ESPHome Web](docs/WEB_EDITOR.md), with no component files or `secrets.yaml` to copy.
+
 [Deutsch](README.de.md) · [Setup guide](docs/SETUP.md) · [Hardware/test status](TEST_STATUS.md) · [Separate LLDP component](https://github.com/mvs90/esphome-lldp)
 
 Use one USB-C connection for **PoE power and native ESPHome Ethernet**, including encrypted API and OTA, without Wi-Fi. This is a version-pinned external component overlay, not an official ESPHome Ethernet driver.

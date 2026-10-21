@@ -14,7 +14,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        example: [inline, p2c5v, ecm]
+        example: [inline, p2c5v, ecm, web-editor]
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
       - run: python3 tools/prepare_ci.py examples/${{ matrix.example }}.yaml .ci/${{ matrix.example }}.yaml

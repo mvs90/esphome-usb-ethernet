@@ -1,0 +1,74 @@
+# Paste this complete file into the ESPHome Device Builder web editor.
+# Replace all three values below. No secrets.yaml or local component copies needed.
+substitutions:
+  device_name: "usb-poe-web"
+  api_key: "PASTE_YOUR_API_KEY_HERE"
+  ota_password: "CHOOSE_YOUR_OWN_OTA_PASSWORD"
+
+esphome:
+  name: ${device_name}
+  min_version: 2026.9.1
+
+# Tested board: Waveshare ESP32-S3-LCD-Driver-Board, 8 MB flash.
+esp32:
+  board: esp32-s3-devkitc-1
+  variant: esp32s3
+  flash_size: 8MB
+  toolchain: esp-idf
+  framework:
+    type: esp-idf
+    version: 5.5.5
+    sdkconfig_options:
+      CONFIG_ESP_CONSOLE_UART_CUSTOM: "y"
+      CONFIG_ESP_CONSOLE_UART_CUSTOM_NUM_0: "y"
+      CONFIG_ESP_CONSOLE_UART_TX_GPIO: "43"
+      CONFIG_ESP_CONSOLE_UART_RX_GPIO: "44"
+      CONFIG_ESP_CONSOLE_UART_BAUDRATE: "115200"
+      CONFIG_ESP_CONSOLE_SECONDARY_NONE: "y"
+      CONFIG_USJ_ENABLE_USB_SERIAL_JTAG: "n"
+
+external_components:
+  - source: github://mvs90/esphome-usb-ethernet@v0.1.0-rc.5
+    components: [ethernet, ethernet_info, logger]
+
+ethernet:
+  id: usb_ethernet
+  type: USB_RTL8152
+  realtek:
+    speed: AUTO
+    eee: true
+    tx_checksum_offload: true
+    tx_aggregation: true
+    rx_aggregation: true
+    tcp_segmentation: true
+    wake_filters: 0
+
+network:
+  enable_ipv6: true
+  min_ipv6_addr_count: 1
+
+# The native USB PHY is occupied by the Ethernet host; log via UART0.
+logger:
+  hardware_uart: UART0
+  baud_rate: 115200
+  level: INFO
+
+api:
+  reboot_timeout: 0s
+  encryption:
+    key: "${api_key}"
+
+ota:
+  - platform: esphome
+    password: "${ota_password}"
+
+text_sensor:
+  - platform: ethernet_info
+    ip_address:
+      name: Ethernet IP
+      address_1:
+        name: Ethernet IPv6 Link Local
+      address_2:
+        name: Ethernet IPv6 Global
+    mac_address:
+      name: Ethernet MAC

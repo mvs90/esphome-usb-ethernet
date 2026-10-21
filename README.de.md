@@ -1,5 +1,7 @@
 # USB-Ethernet und PoE für ESPHome am ESP32-S3
 
+**Ohne Dateien zu kopieren oder Terminal:** [YAML im Webeditor einfügen und mit ESPHome Web erstflashen](docs/WEB_EDITOR.de.md). Vollständige Vorlage ohne `secrets.yaml` und mit automatisch geladenen GitHub-Komponenten.
+
 [English](README.md) · [Vollständige Beispiele](examples) · [Prüfstatus](TEST_STATUS.md)
 
 Eine USB-C-Verbindung liefert dem ESP32-S3 **PoE-Strom und Ethernet** für die native ESPHome-API, Home Assistant und OTA – ohne WLAN. Die externe Komponente überlagert gezielt die ESPHome-Komponenten `ethernet`, `ethernet_info` und `logger`.
