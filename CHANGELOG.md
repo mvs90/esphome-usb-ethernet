@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.1.0-rc.6 (test release)
+
+- One native YAML for both measured InLine/P2C5V adapters; shared chip identification, strict factory-MAC descriptor validation.
+- Bind USB data/control access to the opened device, invalidate removed-device state and defer reopening until pending transfers retire.
+- Updated browser-only YAML guides and examples, optional fixed MAC and explicit cold/live replacement test plan.
+- 18 sanitizer host suites and native/ECM builds pass. No hardware flash or replacement test performed for this version. Earlier hardware results do not qualify this new reconnect path.
+
 ## v0.1.0-rc.5
 
 - First public Ethernet repository for measured InLine33380J POE01 and P2C5V RTL8152-4C10 adapters.

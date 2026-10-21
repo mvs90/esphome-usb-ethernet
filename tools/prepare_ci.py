@@ -5,7 +5,7 @@ import argparse,base64
 from pathlib import Path
 p=argparse.ArgumentParser();p.add_argument('example',type=Path);p.add_argument('output',type=Path);p.add_argument('--ethernet-path',type=Path);p.add_argument('--lldp-path',type=Path);a=p.parse_args()
 root=Path(__file__).resolve().parents[1];text=a.example.read_text()
-for name,tag,path in [('esphome-usb-ethernet','v0.1.0-rc.5',a.ethernet_path),('esphome-lldp','v0.1.0-rc.1',a.lldp_path)]:
+for name,tag,path in [('esphome-usb-ethernet','v0.1.0-rc.6',a.ethernet_path),('esphome-lldp','v0.1.0-rc.1',a.lldp_path)]:
  component='ethernet' if name=='esphome-usb-ethernet' else 'lldp'
  if path is None and (root/'components'/component).exists():path=root/'components'
  if path is not None:

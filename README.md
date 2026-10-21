@@ -1,5 +1,7 @@
 # USB Ethernet + PoE for ESPHome on ESP32-S3
 
+**v0.1.0-rc.6 test release:** reconnect changes are software-tested only; physical adapter replacement, fixed-MAC replacement and live hotplug remain unqualified with this version. [Pending tests](https://github.com/mvs90/esphome-usb-ethernet/blob/v0.1.0-rc.6/docs/ADAPTER_SWITCHING.de.md).
+
 **Browser-only setup:** [Paste YAML into the Device Builder and first-flash with ESPHome Web](docs/WEB_EDITOR.md), with no component files or `secrets.yaml` to copy.
 
 [Deutsch](README.de.md) · [Setup guide](docs/SETUP.md) · [Hardware/test status](TEST_STATUS.md) · [Separate LLDP component](https://github.com/mvs90/esphome-lldp)
@@ -17,7 +19,7 @@ Both use **`type: USB_RTL8152`**. Do not select a configuration or assume compat
 
 Tested host: **Waveshare ESP32-S3-LCD-Driver-Board, 8 MB flash**, without display/battery. This is a different board from ESP32-S3-Touch-LCD-4 Rev.4.0. ESP32-C6 Super Mini has no suitable native USB host for this setup. A generic ESP32-S3 board also needs its own USB wiring/power check.
 
-**Pinned toolchain:** ESPHome **2026.9.1**, ESP-IDF **5.5.5**, release **v0.1.0-rc.5**. Other ESPHome versions require validation because `ethernet`, `ethernet_info`, and `logger` override built-in components. No ESPHome/IDF source fork is required; this is not a promise of compatibility with every future release.
+**Pinned toolchain:** ESPHome **2026.9.1**, ESP-IDF **5.5.5**, release **v0.1.0-rc.6**. Other ESPHome versions require validation because `ethernet`, `ethernet_info`, and `logger` override built-in components. No ESPHome/IDF source fork is required; this is not a promise of compatibility with every future release.
 
 ## Quick start
 
@@ -36,7 +38,7 @@ Merge these sections into your existing YAML; do not create a second `esp32`, `e
 
 ```yaml
 external_components:
-  - source: github://mvs90/esphome-usb-ethernet@v0.1.0-rc.5
+  - source: github://mvs90/esphome-usb-ethernet@v0.1.0-rc.6
     components: [ethernet, ethernet_info, logger]
 
 ethernet:
@@ -81,4 +83,4 @@ Reference: [ESPHome external-components documentation](https://esphome.io/compon
 
 ## Automatic adapter selection
 
-Both measured adapters use the same `USB_RTL8152` YAML: no retail-model selector is required. See [adapter switching and stable MAC configuration (German)](docs/ADAPTER_SWITCHING.de.md). The local reconnect-hardening candidate still requires hardware qualification.
+Both measured adapters use the same `USB_RTL8152` YAML: no retail-model selector is required. See [adapter switching and stable MAC configuration (German)](docs/ADAPTER_SWITCHING.de.md). The v0.1.0-rc.6 reconnect changes still require hardware qualification.

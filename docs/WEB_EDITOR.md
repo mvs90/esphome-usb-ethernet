@@ -1,5 +1,13 @@
 # Browser-only setup: paste YAML, compile, then use ESPHome Web
 
+## v0.1.0-rc.6 test release: one YAML for both adapters
+
+**Hardware qualification of the reconnect changes is pending.** These examples pin Ethernet **v0.1.0-rc.6**. Its additional detection/reconnect changes passed 18 host suites and native/ECM firmware builds; no board has been flashed or physically swapped with this version. Earlier hardware results do not qualify the new reconnect path.
+
+Both measured adapters use the same USB/chip identity and `USB_RTL8152` configuration. No retail-model selector is required. With PoE as the only power source, replacing the adapter also restarts the board. Each factory MAC can obtain a different DHCP/IPv6 address. Optionally add your own unique locally administered unicast `mac_address` under the existing `ethernet` block, and a matching DHCP reservation; do not reuse an example MAC on multiple devices.
+
+Still pending: InLine → P2C5V → InLine using one firmware, repeat with a fixed MAC, check DHCP/IPv4/IPv6/API/OTA/LLDP. Separately powered live USB replacement under traffic and from suspend needs its own hardware qualification. No hardware action is needed now. [Detailed test plan (German)](https://github.com/mvs90/esphome-usb-ethernet/blob/v0.1.0-rc.6/docs/ADAPTER_SWITCHING.de.md).
+
 [Full step-by-step German guide, including the complete pasteable YAML](WEB_EDITOR.de.md).
 
 No Git clone, manually copied component files, terminal, `!include`, or `secrets.yaml` is needed. The Builder fetches the pinned external components itself. The one downloaded file is your compiled factory image, selected in the browser flasher.
@@ -15,6 +23,7 @@ No Git clone, manually copied component files, terminal, `!include`, or `secrets
 These board/flash/UART settings describe the tested Waveshare ESP32-S3-LCD-Driver-Board with8MB flash. They do not qualify other boards. The tested overlay remains pinned to ESPHome2026.9.1 / IDF5.5.5. Component runtime and known test limitations are unchanged.
 
 ```yaml
+# Test release v0.1.0-rc.6: adapter replacement hardware tests are pending.
 # Paste this complete file into the ESPHome Device Builder web editor.
 # Replace all three values below. No secrets.yaml or local component copies needed.
 substitutions:
@@ -45,7 +54,7 @@ esp32:
       CONFIG_USJ_ENABLE_USB_SERIAL_JTAG: "n"
 
 external_components:
-  - source: github://mvs90/esphome-usb-ethernet@v0.1.0-rc.5
+  - source: github://mvs90/esphome-usb-ethernet@v0.1.0-rc.6
     components: [ethernet, ethernet_info, logger]
 
 ethernet:

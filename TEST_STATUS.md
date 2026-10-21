@@ -1,8 +1,14 @@
+# Current test release v0.1.0-rc.6 — hardware tests pending
+
+18 ASan/UBSan host suites and complete native RTL8152 / ECM builds passed with ESPHome 2026.9.1 and ESP-IDF 5.5.5. No board was connected, flashed or physically swapped for this extension. Cold replacement in both directions, fixed-MAC replacement, API/OTA/IPv4/IPv6/LLDP after replacement and independently powered live replacement under traffic/from suspend are **NOT YET HARDWARE TESTED**. See [the detailed plan](docs/ADAPTER_SWITCHING.de.md).
+
+The following historical laboratory results describe earlier firmware. They are retained as evidence and do not qualify the new rc.6 reconnect implementation. The documented P2C5V host-link exception and other open hardware limits remain unchanged.
+
 # Public repository layout
 
-The Ethernet repository contains 17 runtime sanitizer suites. The three LLDP
+The Ethernet repository contains 18 runtime sanitizer suites. The three LLDP
 suites and implementation are published separately as mvs90/esphome-lldp.
-Runtime source bytes are unchanged by the split. Public YAML examples are
+The initial repository split did not change runtime bytes; rc.6 adds reconnect hardening. Public YAML examples are
 minimal configurations derived from the tested board profile; CI validates
 the pinned build. Historical laboratory qualification below refers to the
 measured adapters, not to every product batch.
@@ -452,6 +458,6 @@ isoliert. Andere Hardwarefehlerbaselines0 und alle Fehlerdifferenzen0.
 Spezialfälle EEE-LPI/Pause-Framewirkung/erzwungener Halbduplex sowie isoliertes
 Broadcast-/Multicast-Wake bleiben offen. Kein stabiles1.0-Release.
 
-## Adapter replacement candidate (not released)
+## Adapter replacement test release v0.1.0-rc.6
 
-Both measured adapters already share one native YAML. Local reconnect changes add strict factory-MAC parsing, per-device data/control binding and pending-transfer fences. No boards were connected for this change. Cold replacement in both directions, fixed-MAC replacement and separately powered live USB replacement remain unqualified. See [the test plan](docs/ADAPTER_SWITCHING.de.md).
+Both measured adapters already share one native YAML. The rc.6 reconnect changes add strict factory-MAC parsing, per-device data/control binding and pending-transfer fences. No boards were connected for this change. Cold replacement in both directions, fixed-MAC replacement and separately powered live USB replacement remain unqualified. See [the test plan](docs/ADAPTER_SWITCHING.de.md).

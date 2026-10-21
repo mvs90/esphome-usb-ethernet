@@ -1,5 +1,15 @@
 # Einrichtung nur im Browser: YAML einfügen und ESPHome Web flashen
 
+## Testversion v0.1.0-rc.6: beide Adapter, eine YAML
+
+**Neue Testversion, Hardwaretests der Erweiterung noch offen.** Die Beispiele laden Ethernet **v0.1.0-rc.6**. Die zusätzlichen Erkennungs-/Wiederanlaufänderungen sind durch 18 Host-Prüfungen und native-/ECM-Firmwarebuilds softwareseitig geprüft. Mit dieser Version wurde noch kein Board geflasht und kein Adapterwechsel am Board getestet. Frühere Hardwareergebnisse sind keine Freigabe des neuen Wechselpfads.
+
+InLine und P2C5V werden anhand der gemeinsamen geprüften USB-/Chipkennung automatisch behandelt; die YAML muss beim Wechsel nicht geändert werden. Eine zuverlässige Unterscheidung des Handelsnamens ist daraus nicht möglich. Kein zusätzliches `adapter:`-Feld einfügen.
+
+Beim bisherigen PoE-Aufbau startet das Board nach dem Adapterwechsel neu. Ohne eigene `mac_address` kann jeder Adapter eine andere DHCP-/IPv6-Adresse erhalten. Optional unter dem vorhandenen `ethernet`-Block eine eigene, im LAN eindeutige lokale Unicast-MAC ergänzen, zum Beispiel `mac_address: "02:12:34:56:78:90"` (nicht auf mehreren Geräten wiederverwenden). Für eine feste IPv4-Zuteilung im Router eine passende DHCP-Reservierung setzen.
+
+**Später zu prüfen:** InLine → P2C5V → InLine mit identischer Firmware; danach beide Richtungen mit fester MAC, jeweils DHCP/IPv4/IPv6, API, OTA und LLDP. Wechsel ohne Neustart zusätzlich nur mit zuvor geprüfter unabhängiger Boardversorgung, auch bei Last und aus Suspend. Derzeit nichts anschließen oder umstecken. [Vollständiger Prüfplan](https://github.com/mvs90/esphome-usb-ethernet/blob/v0.1.0-rc.6/docs/ADAPTER_SWITCHING.de.md).
+
 Diese Anleitung braucht **keinen Git-Clone, kein Terminal, keine manuell kopierten Komponenten und keine `secrets.yaml`**. Du fügst den YAML-Inhalt unten direkt in den ESPHome-Webeditor ein. Die externen Komponenten lädt der Device Builder automatisch von den fest eingetragenen GitHub-Tags. Nur die vom Builder erzeugte Factory-BIN wird im Browser heruntergeladen und im Webflasher ausgewählt.
 
 Das gleiche YAML funktioniert für die gemessenen **InLine33380J POE01- und P2C5V-Exemplare mit RTL8152-Revision4C10**. Ein Produktname allein garantiert die Chiprevision nicht. LLDP ist optional und hat ein [eigenes vollständiges Webeditor-Beispiel](https://github.com/mvs90/esphome-lldp/blob/main/docs/WEB_EDITOR.de.md).
@@ -27,6 +37,7 @@ Die Platzhalter müssen ersetzt werden. Einen API-Schlüssel nicht als beliebige
 **Boardbezug:** Die Flashgröße 8MB und UART-Pins43/44 passen zum getesteten **Waveshare ESP32-S3-LCD-Driver-Board**. Für andere Platinen sind diese Werte anhand ihrer Beschaltung zu prüfen; Touch-LCD-4 Rev.4.0 und ESP32-C6 Super Mini sind nicht austauschbar mit diesem Aufbau. Der externe USB-UART-Adapter ist für die normale Einrichtung und den ersten Flash nicht nötig.
 
 ```yaml
+# Test release v0.1.0-rc.6: adapter replacement hardware tests are pending.
 # Paste this complete file into the ESPHome Device Builder web editor.
 # Replace all three values below. No secrets.yaml or local component copies needed.
 substitutions:
@@ -57,7 +68,7 @@ esp32:
       CONFIG_USJ_ENABLE_USB_SERIAL_JTAG: "n"
 
 external_components:
-  - source: github://mvs90/esphome-usb-ethernet@v0.1.0-rc.5
+  - source: github://mvs90/esphome-usb-ethernet@v0.1.0-rc.6
     components: [ethernet, ethernet_info, logger]
 
 ethernet:

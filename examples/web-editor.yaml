@@ -1,3 +1,4 @@
+# Test release v0.1.0-rc.6: adapter replacement hardware tests are pending.
 # Paste this complete file into the ESPHome Device Builder web editor.
 # Replace all three values below. No secrets.yaml or local component copies needed.
 substitutions:
@@ -28,7 +29,7 @@ esp32:
       CONFIG_USJ_ENABLE_USB_SERIAL_JTAG: "n"
 
 external_components:
-  - source: github://mvs90/esphome-usb-ethernet@v0.1.0-rc.5
+  - source: github://mvs90/esphome-usb-ethernet@v0.1.0-rc.6
     components: [ethernet, ethernet_info, logger]
 
 ethernet:

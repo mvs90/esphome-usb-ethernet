@@ -22,7 +22,7 @@ Diesen Block in die vollständige [Webeditor-Konfiguration](WEB_EDITOR.de.md) in
 
 Die gemessenen InLine 33380J POE01 und P2C5V stellen beide USB `0bda:8152`, Geräteversion `2000` und RTL-Revision `4C10` bereit. Der Treiber wählt die native USB-Konfiguration, prüft die Revision vor Registerzugriffen und liest die MAC des angeschlossenen Adapters. Ein Markenname lässt sich aus diesen gemeinsamen Kennungen nicht zuverlässig ableiten. Weitere, äußerlich gleiche Geräte mit anderen Chips oder Revisionen sind damit nicht automatisch freigegeben.
 
-Bereits v0.1.0-rc.5 unterstützt beide Geräte beim Start mit derselben YAML. Der lokale Entwicklungskandidat härtet zusätzlich den Wechsel ab: MAC-Strings werden vollständig validiert, USB-Datenport und Steuerzugriffe bleiben an das tatsächlich geöffnete Gerät gebunden, alte Transfers werden vor erneutem Öffnen abgewartet und der Konfigurationszustand wird nach physischer USB-Trennung verworfen. Dieser Kandidat ist noch nicht als neue Version veröffentlicht oder am Board geprüft.
+Bereits v0.1.0-rc.5 unterstützt beide Geräte beim Start mit derselben YAML. Die Testversion v0.1.0-rc.6 härtet zusätzlich den Wechsel ab: MAC-Strings werden vollständig validiert, USB-Datenport und Steuerzugriffe bleiben an das tatsächlich geöffnete Gerät gebunden, alte Transfers werden vor erneutem Öffnen abgewartet und der Konfigurationszustand wird nach physischer USB-Trennung verworfen. Diese Änderungen sind als Testversion veröffentlicht und softwareseitig geprüft, jedoch noch nicht am Board getestet.
 
 ## Wechsel im bisherigen PoE-Aufbau
 

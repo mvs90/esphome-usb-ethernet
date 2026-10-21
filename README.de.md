@@ -1,5 +1,7 @@
 # USB-Ethernet und PoE für ESPHome am ESP32-S3
 
+**Testversion v0.1.0-rc.6:** Die neue Wiedererkennung ist softwareseitig geprüft; Adapterwechsel, feste MAC beim Wechsel und Live-Hotplug sind mit dieser Version noch nicht hardwaregeprüft. [Offene Tests](https://github.com/mvs90/esphome-usb-ethernet/blob/v0.1.0-rc.6/docs/ADAPTER_SWITCHING.de.md).
+
 **Ohne Dateien zu kopieren oder Terminal:** [YAML im Webeditor einfügen und mit ESPHome Web erstflashen](docs/WEB_EDITOR.de.md). Vollständige Vorlage ohne `secrets.yaml` und mit automatisch geladenen GitHub-Komponenten.
 
 [English](README.md) · [Vollständige Beispiele](examples) · [Prüfstatus](TEST_STATUS.md)
@@ -16,7 +18,7 @@ Getestet ist das **Waveshare ESP32-S3-LCD-Driver-Board mit 8 MB Flash, ohne Disp
 
 ## Einrichtung in sechs Schritten
 
-1. **ESPHome 2026.9.1** verwenden. Die Beispiele binden ESP-IDF **5.5.5** und den Repository-Tag **v0.1.0-rc.5** fest ein. Andere Versionen sind nicht automatisch kompatibel.
+1. **ESPHome 2026.9.1** verwenden. Die Beispiele binden ESP-IDF **5.5.5** und den Repository-Tag **v0.1.0-rc.6** fest ein. Andere Versionen sind nicht automatisch kompatibel.
 2. Das passende Beispiel in den eigenen ESPHome-Konfigurationsordner kopieren. Daneben `secrets.yaml` mit eigenem `api_encryption_key` und `ota_password` anlegen; Vorlage: [secrets.example.yaml](examples/secrets.example.yaml). Einen API-Schlüssel erzeugt `openssl rand -base64 32`.
 3. Einen eindeutigen Gerätenamen einstellen. Mit `esphome config inline.yaml` prüfen und mit `esphome compile inline.yaml` bauen; bei P2C5V den entsprechenden Dateinamen verwenden.
 4. Zum ersten Flash den PoE-Adapter vom Board trennen, das Board direkt per USB-Datenkabel am Computer anschließen und den eindeutig zugeordneten Downloadport verwenden: `esphome upload inline.yaml --device <BOARD_PORT>`. Falls erforderlich BOOT/Downloadmodus benutzen.
@@ -43,4 +45,4 @@ Details: [TEST_STATUS.md](TEST_STATUS.md). Lizenz: C/C++-Runtime GPL-3.0-only, P
 
 ## Automatischer Adapterwechsel
 
-InLine und P2C5V verwenden dieselbe `USB_RTL8152`-YAML. Siehe [Erkennung, Umstecken und feste MAC](docs/ADAPTER_SWITCHING.de.md). Der lokale Wechsel-Kandidat ist noch hardwareseitig zu prüfen.
+InLine und P2C5V verwenden dieselbe `USB_RTL8152`-YAML. Siehe [Erkennung, Umstecken und feste MAC](docs/ADAPTER_SWITCHING.de.md). Die Wechseländerungen in Testversion v0.1.0-rc.6 sind noch hardwareseitig zu prüfen.
