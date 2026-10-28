@@ -46,3 +46,9 @@ Details: [TEST_STATUS.md](TEST_STATUS.md). Lizenz: C/C++-Runtime GPL-3.0-only, P
 ## Automatischer Adapterwechsel
 
 InLine und P2C5V verwenden dieselbe `USB_RTL8152`-YAML. Siehe [Erkennung, Umstecken und feste MAC](docs/ADAPTER_SWITCHING.de.md). Die Wechseländerungen in Testversion v0.1.0-rc.6 sind noch hardwareseitig zu prüfen.
+
+## Projekt unterstützen
+
+Wenn dir dieses Projekt hilft, kannst du seine Weiterentwicklung und Pflege
+freiwillig über [PayPal](https://www.paypal.me/mvs90) unterstützen.
+Vielen Dank für deine Unterstützung!

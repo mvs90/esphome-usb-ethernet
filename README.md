@@ -84,3 +84,9 @@ Reference: [ESPHome external-components documentation](https://esphome.io/compon
 ## Automatic adapter selection
 
 Both measured adapters use the same `USB_RTL8152` YAML: no retail-model selector is required. See [adapter switching and stable MAC configuration (German)](docs/ADAPTER_SWITCHING.de.md). The v0.1.0-rc.6 reconnect changes still require hardware qualification.
+
+## Support this project
+
+If you find this project useful, you can support its development and maintenance
+with a voluntary contribution via [PayPal](https://www.paypal.me/mvs90).
+Thank you for your support!
